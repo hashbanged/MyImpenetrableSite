@@ -13,14 +13,28 @@ namespace MyImpenetrableSite
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            int userId = int.Parse(Request.QueryString["Id"].ToString());
             // Create a SqlConnection object
             SqlConnection conn = new SqlConnection(WebConfigurationManager.ConnectionStrings["MISConnectionString"].ToString());
 
             // DELETE statement and SqlCommand object
             // Actually, we don't delete the user. We just deactivate the user.
-            string strDelete = "UPDATE Users SET StatusId = 2 WHERE ID=" + userId;
-            SqlCommand cmdDelete = new SqlCommand(strDelete, conn);
+
+            int userId = int.Parse(Request.QueryString["Id"].ToString());
+
+            SqlCommand cmdDelete = new SqlCommand(null, conn);
+
+            cmdDelete.CommandText = "UPDATE Users " +
+                "SET StatusId = @statusId " +
+                "WHERE ID = @userId";
+
+            SqlParameter paramUserId = new SqlParameter("@userId", System.Data.SqlDbType.Int);
+            paramUserId.Value = userId;
+            cmdDelete.Parameters.Add(paramUserId);
+
+            SqlParameter paramStatusId = new SqlParameter("@statusId", System.Data.SqlDbType.Int);
+            paramStatusId.Value = 2; // '2' signifies soft-deleted/"inactive" status
+            cmdDelete.Parameters.Add(paramStatusId);
+
             conn.Open();
             cmdDelete.ExecuteNonQuery();
             conn.Close();
