@@ -21,56 +21,61 @@ namespace MyImpenetrableSite
             // Create a SQL connection object
             SqlConnection conn = new SqlConnection(WebConfigurationManager.ConnectionStrings["MISConnectionString"].ToString());
 
-            // Create a SQL command object to query username
-            string usernameQuery = "SELECT * FROM Users WHERE Username = '" + txtUsername.Text.Trim() + "'";
-            SqlCommand cmd = new SqlCommand(usernameQuery, conn);
+            string username = txtUsername.Text.Trim().ToLower();
+            string password = txtPassword.Text.Trim();
+
+            SqlCommand cmd = new SqlCommand(null, conn);
+
+            cmd.CommandText = "SELECT * FROM Users " +
+                "WHERE Username = @username " +
+                "AND Password = @password";
+
+            SqlParameter paramUsername = new SqlParameter("@username", System.Data.SqlDbType.NVarChar, 50);
+            paramUsername.Value = username;
+            cmd.Parameters.Add(paramUsername);
+
+            SqlParameter paramPassword = new SqlParameter("@password", System.Data.SqlDbType.NVarChar, 1000);
+            // To-do: Use SHA256 hash function to compare database-stored value.
+            paramPassword.Value = password;
+            cmd.Parameters.Add(paramPassword);
 
             conn.Open();
-            SqlDataReader sqlDataReader = cmd.ExecuteReader();
-            if (!sqlDataReader.HasRows)
+            cmd.Prepare();
+            SqlDataReader reader = cmd.ExecuteReader();
+
+            if (!reader.HasRows)
             {
-                lblLoginError.Text = "The username you entered does not exist. Please try again.";
-                conn.Close();
+                lblLoginError.Text = "That didn't work. Please try again.";
             }
             else
             {
-                conn.Close();
-                string strQuery = "SELECT * FROM Users WHERE Username = '" + txtUsername.Text.Trim()
-                    + "' AND Password = '" + txtPassword.Text.Trim() + "'";
-                cmd = new SqlCommand(strQuery, conn);
-                conn.Open();
-                SqlDataReader reader = cmd.ExecuteReader();
-                if (!reader.HasRows)
+                reader.Read();
+                int roleId = int.Parse(reader["RoleId"].ToString());
+
+                // To-do: Set userId, statusId, and roleId in new session.
+
+                if (roleId == 1)  // Administrator
                 {
-                    lblLoginError.Text = "The password you entered is not correct. Please try again.";
+                    reader.Close();
+                    conn.Close();
+                    Response.Redirect("Admin.aspx");
                 }
                 else
                 {
-                    reader.Read();
-                    int roleId = int.Parse(reader["RoleId"].ToString());
-                    if (roleId == 1)  // Administrator
+                    int statusId = int.Parse(reader["StatusId"].ToString());
+                    string userId = reader["ID"].ToString();
+                    reader.Close();
+                    conn.Close();
+
+                    if (statusId == 2)
                     {
-                        reader.Close();
-                        conn.Close();
-                        Response.Redirect("Admin.aspx");
+                        lblLoginError.Text = "Your account is inactive. Please contact the administrator to deactivate your account first.";
                     }
                     else
                     {
-                        int statusId = int.Parse(reader["StatusId"].ToString());
-                        string userId = reader["ID"].ToString();
-                        reader.Close();
-                        conn.Close();
-
-                        if (statusId == 2)
-                        {
-                            lblLoginError.Text = "Your account is inactive. Please contact the administrator to deactivate your account first.";
-                        }
-                        else
-                        {
-                            Response.Redirect("Members.aspx?Id=" + userId);
-                        }
-
+                        Response.Redirect("Members.aspx?Id=" + userId);
                     }
+
                 }
             }
         }
