@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Data.SqlClient;
 using System.Web.Configuration;
+using System.Data;
 
 namespace MyImpenetrableSite
 {
@@ -21,22 +22,62 @@ namespace MyImpenetrableSite
             // Create a SqlConnection object
             SqlConnection conn = new SqlConnection(WebConfigurationManager.ConnectionStrings["MISConnectionString"].ToString());
 
-            // Autogenerate a username
             string firstName = Request.Form["txtFirstName"].ToString().Trim();
             string lastName = txtLastName.Text.Trim();
-            string username = firstName[0].ToString().ToLower() + lastName.ToLower();
-            string password = firstName + "." + lastName;
-            string email = txtEmail.Text.Trim();
-            string telephone = txtPhone.Text.Trim();
-            // INSERT statements and SqlCommand
-            string strInsert = "INSERT INTO Users (FirstName, LastName, Email, Phone, Username, Password, RoleId, StatusId, LastLoginTime) " +
-                "VALUES ('" + firstName + "', '" + lastName + "', '" + email + "', '" + telephone + "', '" + username + "', '" + password +
-                "', 2, 1, '" + DateTime.Now.ToString() + "')";
+            string currentDateTime = DateTime.Now.ToString();
 
-            SqlCommand cmdInsert = new SqlCommand(strInsert, conn);
+            // Parameterize the SQL statement values.
+            // See: https://docs.microsoft.com/en-us/dotnet/api/system.data.sqlclient.sqlcommand.prepare?view=dotnet-plat-ext-5.0
+
+            SqlCommand cmdInsert = new SqlCommand(null, conn);
+
+            cmdInsert.CommandText = "INSERT INTO Users " +
+                "(FirstName, LastName, Email, Phone, Username, Password, RoleId, StatusId, LastLoginTime) " +
+                "VALUES " +
+                "(@firstName, @lastName, @email, @telephone, @username, @password, @roleId, @statusId, @currentTimestamp)";
+
+            SqlParameter paramFirstName = new SqlParameter("@firstName", SqlDbType.Text, 100);
+            paramFirstName.Value = firstName;
+            cmdInsert.Parameters.Add(paramFirstName);
+
+            SqlParameter paramLastName = new SqlParameter("@lastName", SqlDbType.Text, 100);
+            paramLastName.Value = lastName;
+            cmdInsert.Parameters.Add(paramLastName);
+
+            SqlParameter paramEmail = new SqlParameter("@email", SqlDbType.Text, 250);
+            paramEmail.Value = txtEmail.Text.Trim();
+            cmdInsert.Parameters.Add(paramEmail);
+
+            SqlParameter paramPhone = new SqlParameter("@telephone", SqlDbType.Text, 50);
+            paramPhone.Value = txtPhone.Text.Trim();
+            cmdInsert.Parameters.Add(paramPhone);
+
+            SqlParameter paramUsername = new SqlParameter("@username", SqlDbType.Text, 50);
+            paramUsername.Value = firstName[0].ToString().ToLower() + lastName.ToLower();
+            cmdInsert.Parameters.Add(paramUsername);
+
+            SqlParameter paramPassword = new SqlParameter("@password", SqlDbType.Text, 1000);
+            // To-do: Use SHA256 hash replacement.
+            paramPassword.Value = firstName + "." + lastName;
+            cmdInsert.Parameters.Add(paramPassword);
+
+            SqlParameter paramRoleId = new SqlParameter("@roleId", SqlDbType.Int);
+            paramRoleId.Value = 2;
+            cmdInsert.Parameters.Add(paramRoleId);
+
+            SqlParameter paramStatusId = new SqlParameter("@statusId", SqlDbType.Int);
+            paramStatusId.Value = 1;
+            cmdInsert.Parameters.Add(paramStatusId);
+
+            SqlParameter paramCurrentTimestamp = new SqlParameter("@currentTimestamp", SqlDbType.DateTime);
+            paramCurrentTimestamp.Value = currentDateTime;
+            cmdInsert.Parameters.Add(paramCurrentTimestamp);
+
             conn.Open();
+            cmdInsert.Prepare();
             cmdInsert.ExecuteNonQuery();
             conn.Close();
+
             Response.Redirect("Admin.aspx");
         }
     }
