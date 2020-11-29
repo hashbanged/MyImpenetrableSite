@@ -6,6 +6,7 @@ using System.Web.UI;
 using System.Web.UI.WebControls;
 using System.Web.Configuration;
 using System.Data.SqlClient;
+using System.Data;
 
 namespace MyImpenetrableSite
 {
@@ -21,12 +22,18 @@ namespace MyImpenetrableSite
                 // SqlConnection object
                 SqlConnection conn = new SqlConnection(WebConfigurationManager.ConnectionStrings["MISConnectionString"].ToString());
 
-                string strSelect = "SELECT * FROM Users WHERE ID=" + userId;
+                SqlCommand cmdSelect = new SqlCommand(null, conn);
 
-                // SqlCommand
-                SqlCommand cmdSelect = new SqlCommand(strSelect, conn);
+                cmdSelect.CommandText = "SELECT * FROM Users WHERE ID = @userId";
+
+                SqlParameter paramUserId = new SqlParameter("userId", SqlDbType.Int);
+                paramUserId.Value = userId;
+                cmdSelect.Parameters.Add(paramUserId);
+
                 conn.Open();
+                cmdSelect.Prepare();
                 SqlDataReader reader = cmdSelect.ExecuteReader();
+
                 if (reader.HasRows)
                 {
                     reader.Read();
@@ -44,16 +51,44 @@ namespace MyImpenetrableSite
         protected void btnUpdateProfile_Click(object sender, EventArgs e)
         {
             int userId = int.Parse(Request.QueryString["Id"].ToString());
-            //SqlConnection
+            string firstName = txtFirstName.Text.Trim();
+            string lastName = txtLastName.Text.Trim();
+            string email = txtEmail.Text.Trim();
+            string phone = txtPhone.Text.Trim();
+
+            // SqlConnection
             SqlConnection conn = new SqlConnection(WebConfigurationManager.ConnectionStrings["MISConnectionString"].ToString());
 
-            // UPDATE statement
-            string strUpdate = "UPDATE Users SET FirstName='" + txtFirstName.Text.Trim() + "', LastName='" + txtLastName.Text.Trim()
-                    + "', Email='" + txtEmail.Text.Trim() + "', Phone='" + txtPhone.Text.Trim() + "' WHERE ID=" + userId;
-
             // SqlCommand
-            SqlCommand cmdUpdate = new SqlCommand(strUpdate, conn);
+            SqlCommand cmdUpdate = new SqlCommand(null, conn);
+
+            // UPDATE statement
+            cmdUpdate.CommandText = "UPDATE Users " +
+                "SET FirstName = @firstName, LastName = @lastName, Email = @email, Phone = @phone " +
+                "WHERE ID = @userId";
+
+            SqlParameter paramFirstName = new SqlParameter("@firstName", SqlDbType.NVarChar, 100);
+            paramFirstName.Value = firstName;
+            cmdUpdate.Parameters.Add(paramFirstName);
+
+            SqlParameter paramLastName = new SqlParameter("@lastName", SqlDbType.NVarChar, 100);
+            paramLastName.Value = lastName;
+            cmdUpdate.Parameters.Add(paramLastName);
+
+            SqlParameter paramEmail = new SqlParameter("@email", SqlDbType.NVarChar, 250);
+            paramEmail.Value = txtEmail.Text.Trim();
+            cmdUpdate.Parameters.Add(paramEmail);
+
+            SqlParameter paramPhone = new SqlParameter("@phone", SqlDbType.NVarChar, 50);
+            paramPhone.Value = txtPhone.Text.Trim();
+            cmdUpdate.Parameters.Add(paramPhone);
+
+            SqlParameter paramUserId = new SqlParameter("@userId", SqlDbType.Int);
+            paramUserId.Value = userId;
+            cmdUpdate.Parameters.Add(paramUserId);
+
             conn.Open();
+            cmdUpdate.Prepare();
             cmdUpdate.ExecuteNonQuery();
             conn.Close();
         }
