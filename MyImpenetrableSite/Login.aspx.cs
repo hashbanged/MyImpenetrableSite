@@ -50,23 +50,27 @@ namespace MyImpenetrableSite
             else
             {
                 reader.Read();
+
+                int userId = int.Parse(reader["Id"].ToString());
                 int roleId = int.Parse(reader["RoleId"].ToString());
+                int statusId = int.Parse(reader["StatusId"].ToString());
+
+                reader.Close();
+                conn.Close();
+
+                // Set the session variables to be used in a security context. 
+                Session["user_role_id"] = roleId;
+                Session["user_user_id"] = userId;
+                Session["user_status_id"] = statusId;
 
                 // To-do: Set userId, statusId, and roleId in new session.
 
                 if (roleId == 1)  // Administrator
                 {
-                    reader.Close();
-                    conn.Close();
                     Response.Redirect("Admin.aspx");
                 }
                 else
                 {
-                    int statusId = int.Parse(reader["StatusId"].ToString());
-                    string userId = reader["ID"].ToString();
-                    reader.Close();
-                    conn.Close();
-
                     if (statusId == 2)
                     {
                         lblLoginError.Text = "Your account is inactive. Please contact the administrator to deactivate your account first.";
