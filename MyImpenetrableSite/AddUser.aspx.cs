@@ -34,7 +34,7 @@ namespace MyImpenetrableSite
             cmdInsert.CommandText = "INSERT INTO Users " +
                 "(FirstName, LastName, Email, Phone, Username, Password, RoleId, StatusId, LastLoginTime) " +
                 "VALUES " +
-                "(@firstName, @lastName, @email, @telephone, @username, @password, @roleId, @statusId, @currentTimestamp)";
+                "(@firstName, @lastName, @email, @phone, @username, @password, @roleId, @statusId, @currentTimestamp)";
 
             SqlParameter paramFirstName = new SqlParameter("@firstName", SqlDbType.Text, 100);
             paramFirstName.Value = firstName;
@@ -48,7 +48,7 @@ namespace MyImpenetrableSite
             paramEmail.Value = txtEmail.Text.Trim();
             cmdInsert.Parameters.Add(paramEmail);
 
-            SqlParameter paramPhone = new SqlParameter("@telephone", SqlDbType.Text, 50);
+            SqlParameter paramPhone = new SqlParameter("@phone", SqlDbType.Text, 50);
             paramPhone.Value = txtPhone.Text.Trim();
             cmdInsert.Parameters.Add(paramPhone);
 
