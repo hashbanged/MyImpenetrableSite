@@ -16,17 +16,18 @@ namespace MyImpenetrableSite
         {
             if (!Page.IsPostBack)
             {
-                // Get the user id from the query string
-                int userId = int.Parse(Request.QueryString["Id"].ToString());
-                int sessionUserId = int.Parse(Session["user_user_id"].ToString());
-
                 // Redirect to the login page if no session user is established.
                 if (null == Session["user_user_id"])
                 {
                     Response.Redirect("Login.aspx");
                 }
+
+                // Get the user id from the query string
+                int userId = int.Parse(Request.QueryString["Id"].ToString());
+                int sessionUserId = int.Parse(Session["user_user_id"].ToString());
+
                 // Redirect user ID mismatches to the session user's member page.
-                else if (userId != sessionUserId)
+                if (userId != sessionUserId)
                 {
                     Response.Redirect("Members.aspx?Id=" + sessionUserId);
                 }
