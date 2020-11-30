@@ -20,8 +20,13 @@ namespace MyImpenetrableSite
                 int userId = int.Parse(Request.QueryString["Id"].ToString());
                 int sessionUserId = int.Parse(Session["user_user_id"].ToString());
 
-                // Redirect to the login page if no session user is established
-                if (null == Session["user_user_id"] || userId != sessionUserId)
+                // Redirect to the login page if no session user is established.
+                if (null == Session["user_user_id"])
+                {
+                    Response.Redirect("Login.aspx");
+                }
+                // Redirect user ID mismatches to the session user's member page.
+                else if (userId != sessionUserId)
                 {
                     Response.Redirect("Members.aspx?Id=" + sessionUserId);
                 }
