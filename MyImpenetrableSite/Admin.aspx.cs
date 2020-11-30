@@ -87,7 +87,7 @@ namespace MyImpenetrableSite
                 sb.Append("<td>");
                 sb.Append("<a href='DeleteUser.aspx?Id=");
                 sb.Append(reader["Id"].ToString());
-                sb.Append("'>Delete</a>&nbsp;<a href='EditUser.aspx?Id=");
+                sb.Append("'>Delete</a>&nbsp;<a href='Members.aspx?Id=");
                 sb.Append(reader["Id"].ToString());
                 sb.Append("'>Edit</a>");
 
