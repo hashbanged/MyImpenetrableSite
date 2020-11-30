@@ -14,6 +14,20 @@ namespace MyImpenetrableSite
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            // Redirect null sessions to the login page.
+            if (null == Session["user_user_id"])
+            {
+                Response.Redirect("Login.aspx");
+            }
+
+            int sessionRoleId = int.Parse(Session["user_role_id"].ToString());
+
+            // Redirect non-admin users to the login page.
+            if (1 != sessionRoleId)
+            {
+                Response.Redirect("Login.aspx");
+            }
+
             // Create a SqlConnection object
             SqlConnection conn = new SqlConnection(WebConfigurationManager.ConnectionStrings["MISConnectionString"].ToString());
 
@@ -40,11 +54,16 @@ namespace MyImpenetrableSite
             sb.Append("<th>Last Name</th>");
             sb.Append("<th>Username</th>");
             sb.Append("<th>Email</th>");
+            sb.Append("<th>Role</th>");
+            sb.Append("<th>Status</th>");
             sb.Append("<th>Action</th>");
             sb.Append("<tbody>");
 
             while (reader.Read())
             {
+                string role = int.Parse(reader["RoleId"].ToString()) == 1 ? "admin" : "user";
+                string status = int.Parse(reader["StatusId"].ToString()) == 1 ? "active" : "removed";
+
                 sb.Append("<tr>");
 
                 sb.Append("<td>");
@@ -58,6 +77,12 @@ namespace MyImpenetrableSite
                 sb.Append("</td>");
                 sb.Append("<td>");
                 sb.Append(reader["Email"].ToString());
+                sb.Append("</td>");
+                sb.Append("<td>");
+                sb.Append(role);
+                sb.Append("</td>");
+                sb.Append("<td>");
+                sb.Append(status);
                 sb.Append("</td>");
                 sb.Append("<td>");
                 sb.Append("<a href='DeleteUser.aspx?Id=");
