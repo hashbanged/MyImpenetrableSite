@@ -25,9 +25,10 @@ namespace MyImpenetrableSite
                 // Get the user id from the query string
                 int userId = int.Parse(Request.QueryString["Id"].ToString());
                 int sessionUserId = int.Parse(Session["user_user_id"].ToString());
+                int sessionRoleId = int.Parse(Session["user_role_id"].ToString());
 
-                // Redirect user ID mismatches to the session user's member page.
-                if (userId != sessionUserId)
+                // Redirect non-admin user ID mismatches to the session user's member page.
+                if (sessionRoleId != 1 && (userId != sessionUserId))
                 {
                     Response.Redirect("Members.aspx?Id=" + sessionUserId);
                 }
