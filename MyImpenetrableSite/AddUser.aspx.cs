@@ -14,7 +14,15 @@ namespace MyImpenetrableSite
     {
         protected void Page_Load(object sender, EventArgs e)
         {
+            int sessionRoleId = int.Parse(Session["user_role_id"].ToString());
+            int sessionStatusId = int.Parse(Session["user_status_id"].ToString());
 
+            // Redirect to the login page if the session user doesn't exist or 
+            // is invalid (is soft-deleted or doesn't have the admin role).
+            if (1 != sessionStatusId || 1 != sessionRoleId)
+            {
+                Response.Redirect("Login.aspx");
+            }
         }
 
         protected void btnAddUser_Click(object sender, EventArgs e)
