@@ -64,9 +64,11 @@ namespace MyImpenetrableSite
             paramUsername.Value = firstName[0].ToString().ToLower() + lastName.ToLower();
             cmdInsert.Parameters.Add(paramUsername);
 
+            // A password hash is stored for new users.
             SqlParameter paramPassword = new SqlParameter("@password", SqlDbType.Text, 1000);
-            // To-do: Use SHA256 hash replacement.
-            paramPassword.Value = firstName + "." + lastName;
+            string passwordPlain = firstName + "." + lastName;
+            string passwordHashed = Hasher.Hash(passwordPlain);
+            paramPassword.Value = passwordHashed;
             cmdInsert.Parameters.Add(paramPassword);
 
             SqlParameter paramRoleId = new SqlParameter("@roleId", SqlDbType.Int);
